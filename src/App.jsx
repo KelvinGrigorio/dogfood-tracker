@@ -16,19 +16,45 @@ export default function App() {
   };
 
   // Garante que o login anônimo seja persistente
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        signInAnonymously(auth).catch((error) => {
-          console.error("Erro no login anônimo:", error);
-        });
-      }
-    });
+  useEffect
+(
+() =>
+ {
+  
+const
+ unsubscribe = 
+onAuthStateChanged
+(auth, 
+(
+user
+) => {
+    
+if
+ (user) {
+      
+setUser
+(user);
+    } 
+else
+ {
+      
+navigate
+(
+"/login"
+); 
+// Redireciona pro login se não tiver user
 
-    return () => unsubscribe();
-  }, []);
+    }
+  });
+
+  
+return
+ 
+() =>
+ 
+unsubscribe
+();
+}, [navigate]);
 
   // Busca os dogs fixos após o login
   useEffect(() => {
