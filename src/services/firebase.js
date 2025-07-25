@@ -1,7 +1,22 @@
 // src/services/firebase.js
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getAuth } from "firebase/auth";
+import
+ { initializeApp } 
+from
+ 
+"firebase/app"
+;
+import
+ { getAuth, setPersistence, browserLocalPersistence } 
+from
+ 
+"firebase/auth"
+;
+import
+ { getDatabase } 
+from
+ 
+"firebase/database"
+;
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,6 +28,50 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = getDatabase(app);
-export const auth = getAuth(app);
+const
+ app = 
+initializeApp
+(firebaseConfig);
+const
+ auth = 
+getAuth
+(app);
+const
+ db = 
+getDatabase
+(app);
+
+// 🔒 Aqui forçamos o Firebase a manter o login salvo localmente
+
+setPersistence
+(auth, browserLocalPersistence)
+  .
+then
+(
+() =>
+ {
+    
+console
+.
+log
+(
+"Persistência configurada para local"
+);
+  })
+  .
+catch
+(
+(
+error
+) => {
+    
+console
+.
+error
+(
+"Erro ao definir persistência:"
+, error);
+  });
+
+export
+ { auth, db };
