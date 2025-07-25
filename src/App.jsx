@@ -16,12 +16,89 @@ export default function App() {
     });
   };
 
-  useEffect(() => {
-    signInAnonymously(auth);
-    onAuthStateChanged(auth, (user) => {
-      if (user) setUser(user);
+  useEffect
+(
+() =>
+ {
+    
+const
+ unsubscribe = 
+onAuthStateChanged
+(auth, 
+(
+user
+) => {
+      
+if
+ (user) {
+        
+setUser
+(user);
+      } 
+else
+ {
+        
+signInAnonymously
+(auth).
+catch
+(
+(
+error
+) => {
+          
+console
+.
+error
+(
+"Erro no login anônimo:"
+, error);
+        });
+      }
     });
+
+    
+return
+ 
+() =>
+ 
+unsubscribe
+();
   }, []);
+
+  
+useEffect
+(
+() =>
+ {
+    
+if
+ (!user) 
+return
+; 
+// só roda se usuário estiver definido
+
+    
+const
+ dogsRef = 
+dbRef
+(db, 
+`dogs`
+);
+    
+onValue
+(dogsRef, 
+(
+snapshot
+) => {
+      
+const
+ data = snapshot.
+val
+() || {};
+      
+setDogs(data);
+	});
+      }, [user]);
 
   useEffect(() => {
     if (user) {
