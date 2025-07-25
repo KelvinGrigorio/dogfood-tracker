@@ -25,7 +25,7 @@ export default function App() {
 
   useEffect(() => {
     if (user) {
-      const dogsRef = ref(db, `users/${user.uid}/dogs`);
+      const dogsRef = ref(db, `dogs`);
       onValue(dogsRef, (snapshot) => {
         const data = snapshot.val() || {};
         setDogs(data);
@@ -44,7 +44,7 @@ export default function App() {
   };
 
   const feedDog = (dogId) => {
-    const dogRef = ref(db, `users/${user.uid}/dogs/${dogId}`);
+    const dogRef = ref(db, `dogs/${dogId}`);
     set(dogRef, {
       ...dogs[dogId],
       lastFed: new Date().toISOString(),
@@ -79,7 +79,7 @@ export default function App() {
           🐶 Controle de Ração
         </h1>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+        {/*<div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
           <input
             className="flex-1 rounded-lg p-3 text-gray-900 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400 w-full"
             type="text"
@@ -93,7 +93,7 @@ export default function App() {
           >
             Adicionar
           </button>
-        </div>
+        </div>*/}
 
         <ul className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 pb-2 scrollbar-thin scrollbar-thumb-yellow-300">
           {Object.entries(dogs).map(([id, dog]) => (
