@@ -4,7 +4,7 @@ import { ref, onValue, set, push } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { auth } from "./services/firebase"; // se estiver em outro caminho, ajusta
+
 
 
 export default function App() {
