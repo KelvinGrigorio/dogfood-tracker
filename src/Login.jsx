@@ -12,6 +12,59 @@ const authorizedEmails = [
   "null"
 ];
 
+const styles = {
+  container: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#f4f4f4",
+    padding: "1rem",
+  },
+  card: {
+    background: "white",
+    padding: "2rem",
+    borderRadius: "12px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    width: "100%",
+    maxWidth: "400px",
+  },
+  title: {
+    marginBottom: "1.5rem",
+    textAlign: "center",
+    fontSize: "1.8rem",
+    color: "#333",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  input: {
+    padding: "0.75rem",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "1rem",
+  },
+  button: {
+    padding: "0.75rem",
+    borderRadius: "8px",
+    border: "none",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "1rem",
+    transition: "background 0.3s ease",
+  },
+  error: {
+    color: "red",
+    marginTop: "0.5rem",
+    textAlign: "center",
+  }
+};
+
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -35,26 +88,29 @@ export default function Login() {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
+  <div style={styles.container}>
+    <div style={styles.card}>
+      <h1 style={styles.title}>Dogfood Tracker 🐾</h1>
+      <form onSubmit={handleLogin} style={styles.form}>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          style={styles.input}
         />
-        <br />
         <input
           type="password"
           placeholder="Senha"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
+          style={styles.input}
         />
-        <br />
-        <button type="submit">Entrar</button>
-        {erro && <p style={{ color: "red" }}>{erro}</p>}
+        <button type="submit" style={styles.button}>Entrar</button>
+        {erro && <p style={styles.error}>{erro}</p>}
       </form>
     </div>
-  );
+  </div>
+);
+
 }
