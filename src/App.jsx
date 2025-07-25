@@ -2,11 +2,23 @@ import { useState, useEffect } from "react";
 import { db, auth } from "./services/firebase";
 import { ref, onValue, set, push } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { auth } from "./services/firebase"; // se estiver em outro caminho, ajusta
+
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [dogs, setDogs] = useState({});
   const [dogName, setDogName] = useState("");
+const navigate = useNavigate();
+
+const handleLogout = () => {
+  signOut(auth).then(() => {
+    navigate("/login");
+  });
+};
+
 
   useEffect(() => {
     signInAnonymously(auth);
@@ -49,7 +61,13 @@ export default function App() {
 >
       <div className="w-full max-w-3xl bg-white bg-opacity-10 backdrop-blur-xl rounded-2xl p-8 shadow-xl">
         <h1 className="text-4xl font-extrabold mb-8 text-center drop-shadow-lg">
-          🐶 Controle de Ração
+<button
+  onClick={handleLogout}
+  className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+>
+  Sair
+</button>
+	    🐶 Controle de Ração
         </h1>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
