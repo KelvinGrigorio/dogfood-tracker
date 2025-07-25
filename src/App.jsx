@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "./services/firebase";
-import { ref, onValue, set, push } from "firebase/database";
+import { ref as dbRef, onValue, set } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [dogs, setDogs] = useState({});
-  const [dogName, setDogName] = useState("");
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -16,112 +15,33 @@ export default function App() {
     });
   };
 
-  useEffect
-(
-() =>
- {
-    
-const
- unsubscribe = 
-onAuthStateChanged
-(auth, 
-(
-user
-) => {
-      
-if
- (user) {
-        
-setUser
-(user);
-      } 
-else
- {
-        
-signInAnonymously
-(auth).
-catch
-(
-(
-error
-) => {
-          
-console
-.
-error
-(
-"Erro no login anônimo:"
-, error);
+  // Garante que o login anônimo seja persistente
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        signInAnonymously(auth).catch((error) => {
+          console.error("Erro no login anônimo:", error);
         });
       }
     });
 
-    
-return
- 
-() =>
- 
-unsubscribe
-();
+    return () => unsubscribe();
   }, []);
 
-  
-useEffect
-(
-() =>
- {
-    
-if
- (!user) 
-return
-; 
-// só roda se usuário estiver definido
-
-    
-const
- dogsRef = 
-dbRef
-(db, 
-`dogs`
-);
-    
-onValue
-(dogsRef, 
-(
-snapshot
-) => {
-      
-const
- data = snapshot.
-val
-() || {};
-      
-setDogs(data);
-	});
-      }, [user]);
-
+  // Busca os dogs fixos após o login
   useEffect(() => {
-    if (user) {
-      const dogsRef = ref(db, `dogs`);
-      onValue(dogsRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        setDogs(data);
-      });
-    }
+    if (!user) return;
+    const dogsRef = dbRef(db, `dogs`);
+    onValue(dogsRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      setDogs(data);
+    });
   }, [user]);
 
-  const addDog = () => {
-    if (!dogName) return;
-    const newDogRef = push(ref(db, `users/${user.uid}/dogs`));
-    set(newDogRef, {
-      name: dogName,
-      lastFed: null,
-    });
-    setDogName("");
-  };
-
   const feedDog = (dogId) => {
-    const dogRef = ref(db, `dogs/${dogId}`);
+    const dogRef = dbRef(db, `dogs/${dogId}`);
     set(dogRef, {
       ...dogs[dogId],
       lastFed: new Date().toISOString(),
@@ -138,6 +58,15 @@ setDogs(data);
     if (minutes >= 1) return `há ${minutes}min`;
     return "agora mesmo";
   };
+
+  // Enquanto o user não estiver disponível, exibe tela de loading
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <p className="text-lg font-semibold">Carregando doguinhos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-fuchsia-500 to-pink-500 flex items-center justify-center text-white px-4 py-6 sm:px-6 md:px-10 relative">
@@ -156,22 +85,6 @@ setDogs(data);
           🐶 Controle de Ração
         </h1>
 
-        {/*<div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
-          <input
-            className="flex-1 rounded-lg p-3 text-gray-900 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400 w-full"
-            type="text"
-            placeholder="Nome do doguinho"
-            value={dogName}
-            onChange={(e) => setDogName(e.target.value)}
-          />
-          <button
-            onClick={addDog}
-            className="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold rounded-lg px-6 py-3 shadow-md transition duration-200"
-          >
-            Adicionar
-          </button>
-        </div>*/}
-
         <ul className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 pb-2 scrollbar-thin scrollbar-thumb-yellow-300">
           {Object.entries(dogs).map(([id, dog]) => (
             <li
@@ -181,8 +94,7 @@ setDogs(data);
               <div>
                 <h2 className="text-xl font-bold">{dog.name}</h2>
                 <p className="text-sm text-yellow-100">
-                  Última refeição:{" "}
-                  {dog.lastFed ? timeSince(dog.lastFed) : "Nunca"}
+                  Última refeição: {dog.lastFed ? timeSince(dog.lastFed) : "Nunca"}
                 </p>
               </div>
               <button
