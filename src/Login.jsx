@@ -1,16 +1,11 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "./services/firebase";
 import { useNavigate } from "react-router-dom";
-
-// ⬇️ AQUI VAI A LISTA DOS EMAILS PERMITIDOS
-const authorizedEmails = [
-  "kelvingrigorio@gmail.com",
-  "familia_grigorio@hotmail.com",
-  "null",
-  "null",
-  "null"
-];
 
 const styles = {
   container: {
@@ -61,56 +56,126 @@ const styles = {
     color: "red",
     marginTop: "0.5rem",
     textAlign: "center",
-  }
+  },
+  message: {
+    color: "green",
+    marginTop: "0.5rem",
+    textAlign: "center",
+  },
+  toggleText: {
+    fontSize: "0.9rem",
+    color: "#4CAF50",
+    textAlign: "center",
+    marginTop: "1rem",
+    cursor: "pointer",
+    textDecoration: "underline",
+  },
+  forgotPassword: {
+    fontSize: "0.85rem",
+    color: "#2196F3",
+    cursor: "pointer",
+    textAlign: "right",
+    marginTop: "-0.5rem",
+    marginBottom: "1rem",
+    userSelect: "none",
+  },
 };
-
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErro(null);
+    setMessage(null);
 
-    if (!authorizedEmails.includes(email)) {
-      setErro("Acesso não autorizado.");
+    if (!email) {
+      setErro("Por favor, insira o email.");
+      return;
+    }
+
+    if (!senha && !isRegistering) {
+      setErro("Por favor, insira a senha.");
       return;
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, senha);
-      navigate("/"); // redireciona pra home ou dashboard
+      if (isRegistering) {
+        await createUserWithEmailAndPassword(auth, email, senha);
+      } else {
+        await signInWithEmailAndPassword(auth, email, senha);
+      }
+      navigate("/");
     } catch (err) {
-      setErro("Email ou senha incorretos.");
+      if (isRegistering) {
+        setErro("Erro ao criar conta: " + err.message);
+      } else {
+        setErro("Email ou senha incorretos.");
+      }
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setErro(null);
+    setMessage(null);
+
+    if (!email) {
+      setErro("Por favor, insira o email para recuperar a senha.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage("Email de recuperação enviado! Verifique sua caixa de entrada.");
+    } catch (err) {
+      setErro("Erro ao enviar email: " + err.message);
     }
   };
 
   return (
-  <div style={styles.container}>
-    <div style={styles.card}>
-      <h1 style={styles.title}>Dogfood Tracker 🐾</h1>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>Entrar</button>
-        {erro && <p style={styles.error}>{erro}</p>}
-      </form>
-    </div>
-  </div>
-);
-
-}
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Dogfood Tracker 🐾</h1>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={styles.input}
+          />
+          {!isRegistering && (
+            <input
+              type="password"
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              style={styles.input}
+            />
+          )}
+          {!isRegistering && (
+            <p style={styles.forgotPassword} onClick={handleResetPassword}>
+              Esqueci minha senha
+            </p>
+          )}
+          <button type="submit" style={styles.button}>
+            {isRegistering ? "Cadastrar" : "Entrar"}
+          </button>
+          {erro && <p style={styles.error}>{erro}</p>}
+          {message && <p style={styles.message}>{message}</p>}
+        </form>
+        <p
+          style={styles.toggleText}
+          onClick={() => {
+            setErro(null);
+            setMessage(null);
+            setIsRegistering(!isRegistering);
+          }}
+        >
+          {isRegistering
+            ? "Já tem conta? Faça login aqui"
