@@ -97,7 +97,7 @@ export default function App() {
           <input
             className="flex-1 rounded-lg p-3 text-gray-900 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             type="text"
-            placeholder="Nome do doguinho"
+            placeholder="Nome do doguinho/gatinho"
             value={dogName}
             onChange={(e) => setDogName(e.target.value)}
           />
