@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "./services/firebase";
-import { ref as dbRef, onValue, set } from "firebase/database";
-import { signInAnonymously, onAuthStateChanged, signOut } from "firebase/auth";
+import { ref as dbRef, onValue, set, push } from "firebase/database";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [dogs, setDogs] = useState({});
+  const [dogName, setDogName] = useState("");
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -15,59 +16,40 @@ export default function App() {
     });
   };
 
-  // Garante que o login anônimo seja persistente
-  useEffect
-(
-() =>
- {
-  
-const
- unsubscribe = 
-onAuthStateChanged
-(auth, 
-(
-user
-) => {
-    
-if
- (user) {
-      
-setUser
-(user);
-    } 
-else
- {
-      
-navigate
-(
-"/login"
-); 
-// Redireciona pro login se não tiver user
+  // Controle do login persistente e redirecionamento
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        navigate("/login");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
-    }
-  });
-
-  
-return
- 
-() =>
- 
-unsubscribe
-();
-}, [navigate]);
-
-  // Busca os dogs fixos após o login
+  // Busca os dogs do usuário logado
   useEffect(() => {
     if (!user) return;
-    const dogsRef = dbRef(db, `dogs`);
-    onValue(dogsRef, (snapshot) => {
+    const dogsRef = dbRef(db, `users/${user.uid}/dogs`);
+    return onValue(dogsRef, (snapshot) => {
       const data = snapshot.val() || {};
       setDogs(data);
     });
   }, [user]);
 
+  const addDog = () => {
+    if (!dogName.trim()) return;
+    const newDogRef = push(dbRef(db, `users/${user.uid}/dogs`));
+    set(newDogRef, {
+      name: dogName.trim(),
+      lastFed: null,
+    });
+    setDogName("");
+  };
+
   const feedDog = (dogId) => {
-    const dogRef = dbRef(db, `dogs/${dogId}`);
+    const dogRef = dbRef(db, `users/${user.uid}/dogs/${dogId}`);
     set(dogRef, {
       ...dogs[dogId],
       lastFed: new Date().toISOString(),
@@ -85,7 +67,6 @@ unsubscribe
     return "agora mesmo";
   };
 
-  // Enquanto o user não estiver disponível, exibe tela de loading
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -95,9 +76,9 @@ unsubscribe
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-fuchsia-500 to-pink-500 flex items-center justify-center text-white px-4 py-6 sm:px-6 md:px-10 relative">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-600 via-fuchsia-500 to-pink-500 flex flex-col items-center justify-start text-white px-4 py-6 sm:px-6 md:px-10 relative">
       
-      {/* BOTÃO SAIR */}
+      {/* Botão sair discreto no topo direito */}
       <button
         onClick={handleLogout}
         title="Sair"
@@ -106,10 +87,27 @@ unsubscribe
         🚪
       </button>
 
-      <div className="w-full max-w-3xl bg-white bg-opacity-10 backdrop-blur-xl rounded-2xl px-6 py-8 sm:p-10 shadow-xl">
+      <div className="w-full max-w-3xl bg-white bg-opacity-10 backdrop-blur-xl rounded-2xl px-6 py-8 sm:p-10 shadow-xl mt-6">
         <h1 className="text-3xl sm:text-4xl font-extrabold mb-8 text-center drop-shadow-lg">
           🐶 Controle de Ração
         </h1>
+
+        {/* Input + botão adicionar */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+          <input
+            className="flex-1 rounded-lg p-3 text-gray-900 font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            type="text"
+            placeholder="Nome do doguinho"
+            value={dogName}
+            onChange={(e) => setDogName(e.target.value)}
+          />
+          <button
+            onClick={addDog}
+            className="bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold rounded-lg px-6 py-3 shadow-md transition duration-200 w-full sm:w-auto"
+          >
+            Adicionar
+          </button>
+        </div>
 
         <ul className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 pb-2 scrollbar-thin scrollbar-thumb-yellow-300">
           {Object.entries(dogs).map(([id, dog]) => (
