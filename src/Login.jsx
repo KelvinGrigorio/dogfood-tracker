@@ -99,7 +99,7 @@ export default function Login() {
       return;
     }
 
-    if (!senha && !isRegistering) {
+    if (!senha) {
       setErro("Por favor, insira a senha.");
       return;
     }
@@ -149,15 +149,13 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             style={styles.input}
           />
-          {!isRegistering && (
-            <input
-              type="password"
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              style={styles.input}
-            />
-          )}
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            style={styles.input}
+          />
           {!isRegistering && (
             <p style={styles.forgotPassword} onClick={handleResetPassword}>
               Esqueci minha senha
@@ -179,18 +177,9 @@ export default function Login() {
         >
           {isRegistering
             ? "Já tem conta? Faça login aqui"
-		: "Ainda não tem conta? Crie uma aqui"}
-        
-</
-p
->
-      
-</
-div
->
-    
-</
-div
->
+            : "Ainda não tem conta? Crie uma aqui"}
+        </p>
+      </div>
+    </div>
   );
 }
