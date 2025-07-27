@@ -179,3 +179,18 @@ export default function Login() {
         >
           {isRegistering
             ? "Já tem conta? Faça login aqui"
+		: "Ainda não tem conta? Crie uma aqui"}
+        
+</
+p
+>
+      
+</
+div
+>
+    
+</
+div
+>
+  );
+}
