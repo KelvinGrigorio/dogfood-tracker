@@ -6,6 +6,8 @@ import {
 } from "firebase/auth";
 import { auth } from "./services/firebase";
 import { useNavigate } from "react-router-dom";
+import { sendEmailVerification } from "firebase/auth";
+
 
 const styles = {
   container: {
@@ -89,36 +91,98 @@ export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErro(null);
-    setMessage(null);
+  const
+ 
+handleSubmit
+ = 
+async
+ (
+e
+) => {
+  e.
+preventDefault
+();
+  
+setErro
+(
+null
+);
+  
+setMessage
+(
+null
+);
 
-    if (!email) {
-      setErro("Por favor, insira o email.");
-      return;
-    }
+  
+if
+ (!email || !senha) {
+    
+setErro
+(
+"Por favor, preencha todos os campos."
+);
+    
+return
+;
+  }
 
-    if (!senha) {
-      setErro("Por favor, insira a senha.");
-      return;
+  
+try
+ {
+    
+if
+ (isRegistering) {
+      
+const
+ userCredential = 
+await
+ 
+createUserWithEmailAndPassword
+(auth, email, senha);
+      
+await
+ 
+sendEmailVerification
+(userCredential.
+user
+);
+      
+setMessage
+(
+"Conta criada com sucesso! Verifique seu email."
+);
+    } 
+else
+ {
+      
+await
+ 
+signInWithEmailAndPassword
+(auth, email, senha);
     }
+    
+navigate
+(
+"/"
+);
+  } 
+catch
+ (err) {
+    
+setErro
+(
+      isRegistering
+        ? 
+"Erro ao criar conta: "
+ + err.
+message
 
-    try {
-      if (isRegistering) {
-        await createUserWithEmailAndPassword(auth, email, senha);
-      } else {
-        await signInWithEmailAndPassword(auth, email, senha);
-      }
-      navigate("/");
-    } catch (err) {
-      if (isRegistering) {
-        setErro("Erro ao criar conta: " + err.message);
-      } else {
-        setErro("Email ou senha incorretos.");
-      }
-    }
-  };
+        : 
+"Email ou senha incorretos."
+
+    );
+  }
+};
 
   const handleResetPassword = async () => {
     setErro(null);
