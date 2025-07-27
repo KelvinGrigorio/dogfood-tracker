@@ -3,11 +3,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "./services/firebase";
 import { useNavigate } from "react-router-dom";
-import { sendEmailVerification } from "firebase/auth";
-
 
 const styles = {
   container: {
@@ -91,98 +90,33 @@ export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
 
-  const
- 
-handleSubmit
- = 
-async
- (
-e
-) => {
-  e.
-preventDefault
-();
-  
-setErro
-(
-null
-);
-  
-setMessage
-(
-null
-);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErro(null);
+    setMessage(null);
 
-  
-if
- (!email || !senha) {
-    
-setErro
-(
-"Por favor, preencha todos os campos."
-);
-    
-return
-;
-  }
-
-  
-try
- {
-    
-if
- (isRegistering) {
-      
-const
- userCredential = 
-await
- 
-createUserWithEmailAndPassword
-(auth, email, senha);
-      
-await
- 
-sendEmailVerification
-(userCredential.
-user
-);
-      
-setMessage
-(
-"Conta criada com sucesso! Verifique seu email."
-);
-    } 
-else
- {
-      
-await
- 
-signInWithEmailAndPassword
-(auth, email, senha);
+    if (!email || !senha) {
+      setErro("Por favor, preencha todos os campos.");
+      return;
     }
-    
-navigate
-(
-"/"
-);
-  } 
-catch
- (err) {
-    
-setErro
-(
-      isRegistering
-        ? 
-"Erro ao criar conta: "
- + err.
-message
 
-        : 
-"Email ou senha incorretos."
-
-    );
-  }
-};
+    try {
+      if (isRegistering) {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+        await sendEmailVerification(userCredential.user);
+        setMessage("Conta criada com sucesso! Verifique seu email.");
+      } else {
+        await signInWithEmailAndPassword(auth, email, senha);
+      }
+      navigate("/");
+    } catch (err) {
+      setErro(
+        isRegistering
+          ? "Erro ao criar conta: " + err.message
+          : "Email ou senha incorretos."
+      );
+    }
+  };
 
   const handleResetPassword = async () => {
     setErro(null);
