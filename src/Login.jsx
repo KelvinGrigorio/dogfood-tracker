@@ -36,25 +36,26 @@ const styles = {
     flexDirection: "column",
     gap: "1rem",
   },
+  inputWrapper: {
+    position: "relative",
+    width: "100%",
+  },
   input: {
-    padding: "0.75rem",
+    padding: "0.75rem 2.5rem 0.75rem 0.75rem", // espaço pra o olhinho do lado direito
     borderRadius: "8px",
     border: "1px solid #ccc",
     fontSize: "1rem",
-  },
-  passwordContainer: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
+    width: "100%",
   },
   togglePassword: {
     position: "absolute",
-    right: "10px",
+    top: "50%",
+    right: "0.75rem",
+    transform: "translateY(-50%)",
     cursor: "pointer",
-    fontSize: "0.9rem",
-    color: "#666",
-    background: "transparent",
-    border: "none",
+    fontSize: "1.1rem",
+    color: "#888",
+    userSelect: "none",
   },
   button: {
     padding: "0.75rem",
@@ -99,10 +100,10 @@ const styles = {
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [erro, setErro] = useState(null);
   const [message, setMessage] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -162,21 +163,21 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             style={styles.input}
           />
-          <div style={styles.passwordContainer}>
+          <div style={styles.inputWrapper}>
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              style={{ ...styles.input, paddingRight: "2.5rem" }}
+              style={styles.input}
             />
-            <button
-              type="button"
+            <span
               onClick={() => setShowPassword(!showPassword)}
               style={styles.togglePassword}
+              title={showPassword ? "Ocultar senha" : "Mostrar senha"}
             >
               {showPassword ? "🙈" : "👁️"}
-            </button>
+            </span>
           </div>
           {!isRegistering && (
             <p style={styles.forgotPassword} onClick={handleResetPassword}>
