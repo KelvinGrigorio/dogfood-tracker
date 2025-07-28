@@ -7,6 +7,12 @@ import { useNavigate } from "react-router-dom";
 export default function App() {
   const [user, setUser] = useState(null);
   const [dogs, setDogs] = useState({});
+const
+ [showVerifyEmailNotice, setShowVerifyEmailNotice] = 
+useState
+(
+false
+);
   const [dogName, setDogName] = useState("");
   const navigate = useNavigate();
 
@@ -17,16 +23,68 @@ export default function App() {
   };
 
   // Controle do login persistente e redirecionamento
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        navigate("/login");
+  useEffect
+(
+() =>
+ {
+  
+const
+ unsubscribe = 
+onAuthStateChanged
+(auth, 
+async
+ (user) => {
+    
+if
+ (user) {
+      
+await
+ user.
+reload
+(); 
+// força atualização dos dados
+
+      
+const
+ refreshedUser = auth.
+currentUser
+;
+      
+setUser
+(refreshedUser);
+
+      
+if
+ (!refreshedUser.
+emailVerified
+) {
+        
+setShowVerifyEmailNotice
+(
+true
+); 
+// mostra aviso se não verificado
+
       }
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+    } 
+else
+ {
+      
+navigate
+(
+"/login"
+);
+    }
+  });
+
+  
+return
+ 
+() =>
+ 
+unsubscribe
+();
+}, [navigate]);
 
   // Busca os dogs do usuário logado
   useEffect(() => {
@@ -86,6 +144,22 @@ export default function App() {
       >
         🚪
       </button>
+
+{showVerifyEmailNotice && (
+  <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-yellow-100 border border-yellow-300 text-yellow-900 px-4 py-3 rounded-lg shadow-lg z-50 max-w-md w-full text-center">
+    <strong className="block font-bold mb-1">Confirmação pendente 📬</strong>
+    <span>
+      Verifique seu email para ativar todas as funcionalidades do Dogfood Tracker.
+    </span>
+    <button
+      onClick={() => setShowVerifyEmailNotice(false)}
+      className="mt-3 text-sm underline text-yellow-700 hover:text-yellow-900"
+    >
+      Fechar aviso
+    </button>
+  </div>
+)}
+
 
       <div className="w-full max-w-3xl bg-white bg-opacity-10 backdrop-blur-xl rounded-2xl px-6 py-8 sm:p-10 shadow-xl mt-6">
         <h1 className="text-3xl sm:text-4xl font-extrabold mb-8 text-center drop-shadow-lg">
