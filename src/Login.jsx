@@ -42,6 +42,20 @@ const styles = {
     border: "1px solid #ccc",
     fontSize: "1rem",
   },
+  passwordContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  togglePassword: {
+    position: "absolute",
+    right: "10px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    color: "#666",
+    background: "transparent",
+    border: "none",
+  },
   button: {
     padding: "0.75rem",
     borderRadius: "8px",
@@ -85,6 +99,7 @@ const styles = {
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [erro, setErro] = useState(null);
   const [message, setMessage] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -147,13 +162,22 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             style={styles.input}
           />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            style={styles.input}
-          />
+          <div style={styles.passwordContainer}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              style={{ ...styles.input, paddingRight: "2.5rem" }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={styles.togglePassword}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
           {!isRegistering && (
             <p style={styles.forgotPassword} onClick={handleResetPassword}>
               Esqueci minha senha
