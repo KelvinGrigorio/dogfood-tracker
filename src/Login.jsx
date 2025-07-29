@@ -9,83 +9,7 @@ import { auth } from "./services/firebase";
 import { useNavigate } from "react-router-dom";
 
 const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#f4f4f4",
-    padding: "1rem",
-  },
-  card: {
-    background: "white",
-    padding: "2rem",
-    borderRadius: "12px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    width: "100%",
-    maxWidth: "400px",
-  },
-  title: {
-    marginBottom: "1.5rem",
-    textAlign: "center",
-    fontSize: "1.8rem",
-    color: "#333",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  inputWrapper: {
-    position: "relative",
-    width: "100%",
-  },
-  input: {
-    padding: "0.75rem 2.5rem 0.75rem 0.75rem", // espaço pra o olhinho do lado direito
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "1rem",
-    width: "100%",
-  },
-  togglePassword: {
-    position: "absolute",
-    top: "50%",
-    right: "0.75rem",
-    transform: "translateY(-50%)",
-    cursor: "pointer",
-    fontSize: "1.1rem",
-    color: "#888",
-    userSelect: "none",
-  },
-  button: {
-    padding: "0.75rem",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#4CAF50",
-    color: "white",
-    fontWeight: "bold",
-    cursor: "pointer",
-    fontSize: "1rem",
-    transition: "background 0.3s ease",
-  },
-  error: {
-    color: "red",
-    marginTop: "0.5rem",
-    textAlign: "center",
-  },
-  message: {
-    color: "green",
-    marginTop: "0.5rem",
-    textAlign: "center",
-  },
-  toggleText: {
-    fontSize: "0.9rem",
-    color: "#4CAF50",
-    textAlign: "center",
-    marginTop: "1rem",
-    cursor: "pointer",
-    textDecoration: "underline",
-  },
+  /* ...seu styles de antes... */
   forgotPassword: {
     fontSize: "0.85rem",
     color: "#2196F3",
@@ -95,6 +19,38 @@ const styles = {
     marginBottom: "1rem",
     userSelect: "none",
   },
+  resetEmailWrapper: {
+    marginBottom: "1rem",
+  },
+  resetEmailInput: {
+    padding: "0.5rem",
+    width: "100%",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+    fontSize: "1rem",
+    marginBottom: "0.5rem",
+  },
+  resetButton: {
+    padding: "0.5rem",
+    width: "100%",
+    borderRadius: "8px",
+    border: "none",
+    backgroundColor: "#2196F3",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "1rem",
+  },
+  message: {
+    color: "green",
+    marginTop: "0.5rem",
+    textAlign: "center",
+  },
+  error: {
+    color: "red",
+    marginTop: "0.5rem",
+    textAlign: "center",
+  },
 };
 
 export default function Login() {
@@ -103,7 +59,8 @@ export default function Login() {
   const [erro, setErro] = useState(null);
   const [message, setMessage] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showResetEmail, setShowResetEmail] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -138,14 +95,16 @@ export default function Login() {
     setErro(null);
     setMessage(null);
 
-    if (!email) {
+    if (!resetEmail) {
       setErro("Por favor, insira o email para recuperar a senha.");
       return;
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, resetEmail);
       setMessage("Email de recuperação enviado! Verifique sua caixa de entrada.");
+      setShowResetEmail(false); // fecha o toggle depois de enviar
+      setResetEmail("");
     } catch (err) {
       setErro("Erro ao enviar email: " + err.message);
     }
@@ -163,30 +122,52 @@ export default function Login() {
             onChange={(e) => setEmail(e.target.value)}
             style={styles.input}
           />
-          <div style={styles.inputWrapper}>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              style={styles.input}
-            />
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              style={styles.togglePassword}
-              title={showPassword ? "Ocultar senha" : "Mostrar senha"}
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </span>
-          </div>
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            style={styles.input}
+          />
+
           {!isRegistering && (
-            <p style={styles.forgotPassword} onClick={handleResetPassword}>
-              Esqueci minha senha
-            </p>
+            <>
+              <p
+                style={styles.forgotPassword}
+                onClick={() => {
+                  setShowResetEmail(!showResetEmail);
+                  setErro(null);
+                  setMessage(null);
+                }}
+              >
+                Esqueci minha senha
+              </p>
+
+              {showResetEmail && (
+                <div style={styles.resetEmailWrapper}>
+                  <input
+                    type="email"
+                    placeholder="Digite seu email para recuperar a senha"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    style={styles.resetEmailInput}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    style={styles.resetButton}
+                  >
+                    Enviar recuperação
+                  </button>
+                </div>
+              )}
+            </>
           )}
+
           <button type="submit" style={styles.button}>
             {isRegistering ? "Cadastrar" : "Entrar"}
           </button>
+
           {erro && <p style={styles.error}>{erro}</p>}
           {message && <p style={styles.message}>{message}</p>}
         </form>
@@ -196,6 +177,7 @@ export default function Login() {
             setErro(null);
             setMessage(null);
             setIsRegistering(!isRegistering);
+            setShowResetEmail(false);
           }}
         >
           {isRegistering
